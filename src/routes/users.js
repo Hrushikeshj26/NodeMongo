@@ -7,15 +7,18 @@ import {
   deleteUser,
   loginUser
 } from '../controllers/userController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Routes
+// PUBLIC ROUTES
 router.get('/users', getUsers);
-router.get('/users/:id', getUserById);
-router.post('/users', createUser);
-router.put('/users/:id', updateUser);
-router.delete('/users/:id', deleteUser);
 router.post('/login', loginUser)
+
+// PROTECTED ROUTES
+router.get('/users/:id', authMiddleware, getUserById);
+router.post('/users', authMiddleware, createUser);
+router.put('/users/:id', authMiddleware, updateUser,);
+router.delete('/users/:id', authMiddleware, deleteUser);
 
 export default router;

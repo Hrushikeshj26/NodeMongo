@@ -1,6 +1,6 @@
-// Database model yahan import hoga kyunki database se baat controller karega
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // 1. Get All Users
 export const getUsers = async (req, res) => {
@@ -80,25 +80,30 @@ export const deleteUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).json({error: 'Email and Password requred!!'})
     }
 
     const foundUser = await User.findOne({ email });
-
     if (!foundUser) {
       return res.status(404).json({error: 'User not found!!'})
     }
-
     const isPasswordCorrect = await bcrypt.compare(password, foundUser.password)
 
     if (!isPasswordCorrect) {
       return res.status(400).json({ error: 'wrong password!!'})
     }
 
+    // JWT TOKEN
+    const token = jwt.sign(
+      { userId: foundUser._id, email: foundUser.email },
+      process.env.JWT_SECRET,
+      {expiresIn: '1d'}
+    )
+
     res.status(200).json({
       message: 'Login Successfully....',
+      token: token,
       user: {
         id: foundUser._id,
         name: foundUser.name,
